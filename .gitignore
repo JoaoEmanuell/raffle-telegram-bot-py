@@ -165,3 +165,5 @@ lib64
 include/
 pyvenv.cfg
 .vscode/
+tmp.*
+tmp/*
