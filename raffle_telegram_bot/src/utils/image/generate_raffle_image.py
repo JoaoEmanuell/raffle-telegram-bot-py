@@ -26,7 +26,6 @@ def generate_raffle_image(quantity: int = 100, marked_numbers: list[int] = []) -
     # Fonte and size
     font_size = 25
     font_dir = f"{BASE_DIR.cwd()}/assets/fonts"
-    print(font_dir, save_path)
     font = ImageFont.truetype(f"{font_dir}/Arial.ttf", font_size)
 
     number = 1
