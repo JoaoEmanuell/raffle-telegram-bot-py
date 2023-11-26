@@ -2,15 +2,14 @@ from telegram import Update
 from telegram.ext import ContextTypes, ConversationHandler
 from telegram.constants import ParseMode
 
-from src.db import read_raffle
+from src.db import read_all_user_raffle
 
 
 async def list_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Start command, list the bot commands"""
     user_id = context._user_id
     chat_id = context._chat_id
-    print(user_id, chat_id)
-    query_response = read_raffle(user_id=user_id, chat_id=chat_id)
+    query_response = read_all_user_raffle(user_id=user_id, chat_id=chat_id)
 
     if not query_response["status"]:
         # error

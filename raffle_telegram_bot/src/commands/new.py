@@ -10,10 +10,12 @@ from telegram.ext.filters import TEXT, COMMAND
 from telegram.constants import ParseMode
 
 from ..utils import cancel
-from ..db import create_raffle, update_raffle
+from ..db import create_raffle, update_raffle, read_raffle
+from src.utils import generate_raffle_image
 
 RAFFLE_NAME = 1
 RAFFLE_NUMBERS = 2
+RAFFLE_PUBLISHERS = 3
 
 
 async def new_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
@@ -88,11 +90,45 @@ async def raffle_numbers_response(update: Update, context: CallbackContext) -> i
         )
 
         await update.message.reply_text(
-            f"Rifa criada com sucesso\!", parse_mode=ParseMode.MARKDOWN_V2
+            f"Agora informe os usuários que podem editar a rifa, basta apenas mencioná-los!"
         )
 
         # End
+        return RAFFLE_PUBLISHERS
+
+
+async def raffle_publishers_response(update: Update, context: CallbackContext) -> int:
+    response = update.message.text
+
+    publishers = response.strip().replace("@", "")
+    raffle_name = context.user_data["raffle_name"]
+    user_id = context._user_id
+    chat_id = context._chat_id
+
+    query_response = update_raffle(
+        name=raffle_name, user_id=user_id, chat_id=chat_id, new_publishers=publishers
+    )
+
+    if not query_response["status"]:
+        await update.message.reply_text(query_response["msg"])
+        await update.message.reply_text("Informe usuários válidos!")
+        return RAFFLE_PUBLISHERS
+
+    await update.message.reply_text("Rifa criada com sucesso!")
+
+    query_response = read_raffle(name=raffle_name, user_id=user_id, chat_id=chat_id)
+    if not query_response["status"]:
+        await update.message.reply_text(query_response["msg"])
         return ConversationHandler.END
+    else:
+        raffle = query_response["msg"]
+        marked_numbers = str(raffle["marked_numbers"]).split(" ")
+        print(marked_numbers)
+        image_path = generate_raffle_image(raffle["numbers"], marked_numbers)
+        print(image_path)
+        await update.message.reply_photo(image_path)
+
+    return ConversationHandler.END
 
 
 def create_new_command_handle() -> ConversationHandler:
@@ -101,6 +137,9 @@ def create_new_command_handle() -> ConversationHandler:
         states={
             RAFFLE_NAME: [MessageHandler(TEXT & ~COMMAND, raffle_name_response)],
             RAFFLE_NUMBERS: [MessageHandler(TEXT & ~COMMAND, raffle_numbers_response)],
+            RAFFLE_PUBLISHERS: [
+                MessageHandler(TEXT & ~COMMAND, raffle_publishers_response)
+            ],
         },
         fallbacks=[CommandHandler("cancel", cancel)],
     )
