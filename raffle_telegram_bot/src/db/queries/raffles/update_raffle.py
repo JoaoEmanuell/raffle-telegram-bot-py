@@ -26,7 +26,9 @@ def update_raffle(
         marked_numbers=new_marked_numbers,
     )
 
-    data["numbers"] = int(new_numbers)
+    print(data["numbers"])
+    if data["numbers"] != "None":
+        data["numbers"] = int(new_numbers)
 
     print(f"UPDATE DATA {data}")
 
@@ -64,4 +66,4 @@ def update_raffle(
             return {"status": False, "msg": f"Erro no servidor ao atualizar a rifa!"}
         finally:
             session.close()
-            return {"status": True, "msg": f"Rifa criada com sucesso!"}
+            return {"status": True, "msg": f"Rifa editada com sucesso!"}
