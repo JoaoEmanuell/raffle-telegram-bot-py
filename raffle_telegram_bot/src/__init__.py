@@ -6,6 +6,7 @@ from .commands import (
     create_raffle_command_handle,
     help_command,
     list_command,
+    create_show_command_handle,
 )
 from .utils import cancel
 from .db import create_tables, RaffleModel
