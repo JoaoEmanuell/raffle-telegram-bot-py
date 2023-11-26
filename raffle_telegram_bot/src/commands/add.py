@@ -26,7 +26,7 @@ async def raffle_name_response(update: Update, context: CallbackContext) -> int:
     response = update.message.text
 
     await update.message.reply_text(
-        f"Certo, o nome da rifa é: {response}\nAgora informe os números que você deseja marcar, separado por ','",
+        f"Certo, o nome da rifa é: {response}\nAgora informe os números que você deseja marcar, separado por espaço",
         parse_mode=ParseMode.MARKDOWN_V2,
     )
 
@@ -36,7 +36,7 @@ async def raffle_name_response(update: Update, context: CallbackContext) -> int:
 async def numbers_for_add_response(update: Update, context: CallbackContext) -> int:
     response = update.message.text
 
-    numbers_list = response.split(",")
+    numbers_list = response.strip().split(" ")
     try:
         numbers_list = [int(x) for x in numbers_list]
     except ValueError:

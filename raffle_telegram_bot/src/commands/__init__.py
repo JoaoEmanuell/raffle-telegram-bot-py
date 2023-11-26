@@ -4,3 +4,4 @@ from .delete import create_delete_command_handle
 from .new import create_new_command_handle
 from .raffle import create_raffle_command_handle
 from .help import help_command
+from .list import list_command

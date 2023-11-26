@@ -5,5 +5,7 @@ from .commands import (
     create_new_command_handle,
     create_raffle_command_handle,
     help_command,
+    list_command,
 )
 from .utils import cancel
+from .db import create_tables, RaffleModel

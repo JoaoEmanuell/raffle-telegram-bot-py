@@ -30,7 +30,7 @@ async def raffle_name_response(update: Update, context: CallbackContext) -> int:
     response = update.message.text
 
     await update.message.reply_text(
-        f"Certo, o nome da rifa é: {response}\nAgora informe os números marcados que você deseja deletar, separado por ','",
+        f"Certo, o nome da rifa é: {response}\nAgora informe os números marcados que você deseja deletar, separado por espaço",
         parse_mode=ParseMode.MARKDOWN_V2,
     )
 
@@ -40,7 +40,7 @@ async def raffle_name_response(update: Update, context: CallbackContext) -> int:
 async def numbers_for_delete_response(update: Update, context: CallbackContext) -> int:
     response = update.message.text
 
-    numbers_list = response.split(",")
+    numbers_list = response.split(" ")
     try:
         numbers_list = [int(x) for x in numbers_list]
     except ValueError:
