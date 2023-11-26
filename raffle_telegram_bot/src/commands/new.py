@@ -1,3 +1,5 @@
+from os import remove
+
 from telegram import Update
 from telegram.ext import (
     ContextTypes,
@@ -123,10 +125,9 @@ async def raffle_publishers_response(update: Update, context: CallbackContext) -
     else:
         raffle = query_response["msg"]
         marked_numbers = str(raffle["marked_numbers"]).split(" ")
-        print(marked_numbers)
         image_path = generate_raffle_image(raffle["numbers"], marked_numbers)
-        print(image_path)
         await update.message.reply_photo(image_path)
+        remove(image_path)
 
     return ConversationHandler.END
 
