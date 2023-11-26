@@ -7,13 +7,18 @@ from src import (
     create_new_command_handle,
     create_raffle_command_handle,
     help_command,
+    create_tables,
+    list_command,
 )
 
+
 if __name__ == "__main__":
+    # create tables
+    create_tables()
+
     from os import getenv
     from dotenv import load_dotenv
 
-    # Run server
     load_dotenv()  # load the dotenv
 
     TOKEN = getenv("TOKEN")
@@ -27,8 +32,9 @@ if __name__ == "__main__":
     app.add_handler(create_delete_command_handle())  # delete raffle
     app.add_handler(create_new_command_handle())  # new
     app.add_handler(create_raffle_command_handle())  # raffle
-    app.add_handler(CommandHandler("help", help_command))
+    app.add_handler(CommandHandler("help", help_command))  # help
+    app.add_handler(CommandHandler("list", list_command))  # list
 
+    # Run server
     print("Running server")
-
     app.run_polling()

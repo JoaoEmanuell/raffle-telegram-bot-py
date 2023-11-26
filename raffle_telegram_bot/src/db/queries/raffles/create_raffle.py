@@ -14,18 +14,6 @@ def create_raffle(
     numbers: int = None,
     marked_numbers: str = None,
 ) -> [dict, str | bool]:
-    data = sanitize_xss(
-        name=name,
-        user_id=user_id,
-        chat_id=chat_id,
-        username=username,
-        publishers=publishers,
-        numbers=numbers,
-        marked_numbers=marked_numbers,
-    )
-
-    data["numbers"] = int(numbers)
-
     with Session(db_engine) as session:
         # validate if raffle exists
         exists_raffle = (
@@ -41,8 +29,21 @@ def create_raffle(
                 "msg": "Erro ao criar a rifa, nome da rifa já foi usado!",
             }
 
-        raffle = RaffleModel(**data)
-        session.add(raffle)
+        else:
+            data = sanitize_xss(
+                name=name,
+                user_id=user_id,
+                chat_id=chat_id,
+                username=username,
+                publishers=publishers,
+                numbers=numbers,
+                marked_numbers=marked_numbers,
+            )
+
+            data["numbers"] = int(numbers)
+
+            raffle = RaffleModel(**data)
+            session.add(raffle)
 
         try:
             session.commit()

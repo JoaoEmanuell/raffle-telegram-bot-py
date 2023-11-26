@@ -15,6 +15,9 @@ def update_raffle(
     new_numbers: int = None,
     new_marked_numbers: str = None,
 ):
+    user_id = str(user_id)
+    chat_id = str(chat_id)
+
     data = sanitize_xss(
         name=new_name,
         username=new_username,
@@ -25,27 +28,40 @@ def update_raffle(
 
     data["numbers"] = int(new_numbers)
 
+    print(f"UPDATE DATA {data}")
+
     with Session(db_engine) as session:
-        saved_raffle = session.query(RaffleModel).filter_by(name=name).first()
+        saved_raffle = (
+            session.query(RaffleModel)
+            .filter_by(name=name, chat_id=chat_id, user_id=user_id)
+            .first()
+        )
 
         if saved_raffle:
+            saved_raffle_chat_id = str(saved_raffle.chat_id)
+            saved_raffle_user_id = str(saved_raffle.user_id)
+
             # Validate if raffle belongs to chat
-            if not saved_raffle.chat_id != chat_id:
+            if saved_raffle_chat_id != chat_id:
                 return {"status": False, "msg": "Rifa não pertence ao chat"}
             # Validate if raffle belong to user
-            elif not saved_raffle.user_id != user_id:
-                raise Exception(f"Error, raffle does not belong to ${data['username']}")
+            elif saved_raffle_user_id != user_id:
+                return {"status": False, "msg": f"Rifa não pertence ao usuário"}
 
             for k, v in data.items():
                 if str(v) == "None":  # value is empty
                     pass
                 else:
                     saved_raffle.__setattr__(k, v)
+        else:
+            return {"status": False, "msg": f"Rifa não existe"}
 
         try:
             session.commit()
         except Exception as err:
             session.rollback()
             print(f"Erro to update raffle {err}")
+            return {"status": False, "msg": f"Erro no servidor ao atualizar a rifa!"}
         finally:
             session.close()
+            return {"status": True, "msg": f"Rifa criada com sucesso!"}

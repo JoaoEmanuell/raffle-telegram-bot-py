@@ -1,4 +1,16 @@
-from sqlalchemy import String, Integer, Column
+from os import getenv
+from base64 import b64encode
+
+from sqlalchemy import Integer, Column
+from sqlalchemy_utils import EncryptedType
+from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
+from sqlalchemy import Unicode
+from dotenv import load_dotenv
+
+load_dotenv()
+
+aes_key_str = getenv("AES_KEY")
+AES_KEY = b64encode(aes_key_str.encode("ascii"))
 
 from .base import Base
 
@@ -7,10 +19,20 @@ class RaffleModel(Base):
     __tablename__ = "raffle"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String(200))  # raffle name
-    user_id = Column(String(30))  # creator user id
-    chat_id = Column(String(20))  # chat id
-    username = Column(String(35))  # creator username
-    publishers = Column(String())  # separate with spaces
+    name = Column(
+        EncryptedType(Unicode, AES_KEY, AesEngine, "pkcs5")
+    )  # EncryptedType(Unicode, AES_KEY, AesEngine, "pkcs5")  # raffle name
+    user_id = Column(
+        EncryptedType(Unicode, AES_KEY, AesEngine, "pkcs5")
+    )  # creator user id
+    chat_id = Column(EncryptedType(Unicode, AES_KEY, AesEngine, "pkcs5"))  # chat id
+    username = Column(
+        EncryptedType(Unicode, AES_KEY, AesEngine, "pkcs5")
+    )  # creator username
+    publishers = Column(
+        EncryptedType(Unicode, AES_KEY, AesEngine, "pkcs5")
+    )  # separate with spaces
     numbers = Column(Integer)  # value of the max number
-    marked_numbers = Column(String())  # separate with spaces
+    marked_numbers = Column(
+        EncryptedType(Unicode, AES_KEY, AesEngine, "pkcs5")
+    )  # separate with spaces
