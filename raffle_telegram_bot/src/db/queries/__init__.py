@@ -4,4 +4,5 @@ from .raffles import (
     delete_raffle,
     read_all_user_raffle,
     read_raffle,
+    read_all_chat_raffles
 )
