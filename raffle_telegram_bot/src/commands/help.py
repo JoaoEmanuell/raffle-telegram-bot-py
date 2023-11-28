@@ -8,7 +8,8 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
     commands = [
         "*/new* Cria uma nova rifa",
         "*/add* Adicione números marcados a rifa",
-        "*/list* Lista as rifas criadas pelo usuário",
+        "*/list* Lista as rifas criadas no chat",
+        "*/listMe* Lista as rifas criadas pelo usuário"
         "*/edit* Edita as informações da rifa",
         "*/show* Exibe a imagem da rifa",
         "*/info* Exibe as informações da rifa",

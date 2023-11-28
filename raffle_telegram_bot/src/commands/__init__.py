@@ -5,4 +5,5 @@ from .new import create_new_command_handle
 from .raffle import create_raffle_command_handle
 from .help import help_command
 from .list import list_command
+from .list_me import list_me_command
 from .show import create_show_command_handle
