@@ -7,6 +7,7 @@ from .commands import (
     help_command,
     list_command,
     create_show_command_handle,
+    list_me_command
 )
 from .utils import cancel
 from .db import create_tables, RaffleModel

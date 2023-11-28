@@ -10,6 +10,7 @@ from src import (
     create_tables,
     list_command,
     create_show_command_handle,
+    list_me_command
 )
 
 
@@ -35,6 +36,7 @@ if __name__ == "__main__":
     app.add_handler(create_raffle_command_handle())  # raffle
     app.add_handler(CommandHandler("help", help_command))  # help
     app.add_handler(CommandHandler("list", list_command))  # list
+    app.add_handler(CommandHandler("listMe", list_me_command))  # list user raffles
     app.add_handler(create_show_command_handle())  # show
 
     # Run server
