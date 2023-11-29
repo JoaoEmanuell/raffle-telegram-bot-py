@@ -1,3 +1,4 @@
+from os import remove
 from telegram import Update
 from telegram.ext import (
     ContextTypes,
@@ -9,10 +10,12 @@ from telegram.ext import (
 from telegram.ext.filters import TEXT, COMMAND
 from telegram.constants import ParseMode
 
-from ..utils import cancel
+from ..utils import cancel, generate_raffle_image
+from ..db import read_raffle, add_numbers_to_raffle
 
 RAFFLE_NAME = 1
-NUMBERS_FOR_DELETE = 2
+RAFFLE_USERNAME = 2
+NUMBERS_FOR_DELETE = 3
 
 
 async def delete_number_command(
@@ -20,7 +23,6 @@ async def delete_number_command(
 ) -> None:
     """Delete marked number in the raffle"""
     message = "Informe o nome da rifa"
-    print(context._user_id)
     await update.message.reply_text(message, parse_mode=ParseMode.MARKDOWN_V2)
 
     return RAFFLE_NAME
@@ -29,12 +31,56 @@ async def delete_number_command(
 async def raffle_name_response(update: Update, context: CallbackContext) -> int:
     response = update.message.text
 
-    await update.message.reply_text(
-        f"Certo, o nome da rifa é: {response}\nAgora informe os números marcados que você deseja deletar, separado por espaço",
-        parse_mode=ParseMode.MARKDOWN_V2,
-    )
+    context.user_data["raffle_name"] = response.strip()
 
-    return NUMBERS_FOR_DELETE  # Await
+    raffle_name = context.user_data["raffle_name"]
+    chat_id = context._chat_id
+
+    query_response = read_raffle(
+        name=raffle_name, chat_id=chat_id
+    )  # validate if raffle exists in chat
+
+    if not query_response["status"]:
+        await update.message.reply_text(query_response["msg"])
+        await update.message.reply_text(
+            "Rifa não existe no chat, informe o nome de uma rifa presente no chat, use o */list* para listar todas as rifas criadas nesse chat\!",
+            parse_mode=ParseMode.MARKDOWN_V2,
+        )
+        return RAFFLE_NAME  # Await
+    else:
+        await update.message.reply_text(
+            "Informe o nome do usuário a quem a rifa pertence, mencione o usuário\!",
+            parse_mode=ParseMode.MARKDOWN_V2,
+        )
+
+    return RAFFLE_USERNAME  # Await
+
+
+async def raffle_username_response(update: Update, context: CallbackContext) -> int:
+    response = update.message.text
+
+    username = response.strip().replace("@", "")  # remove the @
+    raffle_name = context.user_data["raffle_name"]
+    chat_id = context._chat_id
+
+    query_response = read_raffle(name=raffle_name, username=username, chat_id=chat_id)
+
+    if not query_response["status"]:
+        await update.message.reply_text(query_response["msg"])
+        await update.message.reply_text(
+            "Informe o nome do usuário a quem a rifa pertence, ou use */cancel* para cancelar a operação",
+            parse_mode=ParseMode.MARKDOWN_V2,
+        )
+        return RAFFLE_USERNAME  # Await
+    else:
+        context.user_data["username"] = username  # add to context
+        context.user_data["raffle_to_delete"] = query_response[
+            "msg"
+        ]  # add raffle to context
+        await update.message.reply_text(
+            "Informe os números que você deseja deletar, separado por espaço"
+        )
+        return NUMBERS_FOR_DELETE  # Await
 
 
 async def numbers_for_delete_response(update: Update, context: CallbackContext) -> int:
@@ -49,10 +95,41 @@ async def numbers_for_delete_response(update: Update, context: CallbackContext) 
             parse_mode=ParseMode.MARKDOWN_V2,
         )
     else:
-        await update.message.reply_text(
-            f"Números: {response}",
-            parse_mode=ParseMode.MARKDOWN_V2,
+        raffle_to_delete = context.user_data["raffle_to_delete"]
+
+        marked_numbers = str(raffle_to_delete["marked_numbers"]).split(" ")
+
+        # remove to marked numbers
+
+        for number in numbers_list:
+            marked_numbers.remove(str(number))
+
+        # update in database
+
+        raffle_name = context.user_data["raffle_name"]
+        chat_id = context._chat_id
+        username = context.user_data["username"]
+        publisher = update.message.from_user.username
+
+        query_response = add_numbers_to_raffle(
+            name=raffle_name,
+            chat_id=chat_id,
+            username=username,
+            publisher=publisher,
+            new_marked_numbers=" ".join(marked_numbers),
         )
+
+        if not query_response["status"]:
+            await update.message.reply_text(query_response["msg"])
+            return NUMBERS_FOR_DELETE  # await
+        else:
+            await update.message.reply_text(
+                "Números apagados com sucesso\nGerando uma nova imagem"
+            )
+            numbers = int(raffle_to_delete["numbers"])
+            image_path = generate_raffle_image(numbers, marked_numbers)
+            await update.message.reply_photo(image_path)
+            remove(image_path)
 
         return ConversationHandler.END  # end
 
@@ -62,6 +139,9 @@ def create_delete_number_command_handle() -> ConversationHandler:
         entry_points=[CommandHandler("deleteNumber", delete_number_command)],
         states={
             RAFFLE_NAME: [MessageHandler(TEXT & ~COMMAND, raffle_name_response)],
+            RAFFLE_USERNAME: [
+                MessageHandler(TEXT & ~COMMAND, raffle_username_response)
+            ],
             NUMBERS_FOR_DELETE: [
                 MessageHandler(TEXT & ~COMMAND, numbers_for_delete_response)
             ],
