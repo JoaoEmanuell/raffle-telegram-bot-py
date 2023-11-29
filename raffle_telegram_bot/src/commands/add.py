@@ -32,13 +32,18 @@ async def raffle_name_response(update: Update, context: CallbackContext) -> int:
     context.user_data["raffle_name"] = response.strip()
 
     raffle_name = context.user_data["raffle_name"]
-    user_id = context._user_id
     chat_id = context._chat_id
 
-    query_response = read_raffle(name=raffle_name, user_id=user_id, chat_id=chat_id)
+    query_response = read_raffle(
+        name=raffle_name, chat_id=chat_id
+    )  # validate if raffle exists in chat
 
     if not query_response["status"]:
         await update.message.reply_text(query_response["msg"])
+        await update.message.reply_text(
+            "Rifa não existe no chat, informe o nome de uma rifa presente no chat, use o */list* para listar todas as rifas criadas nesse chat\!",
+            parse_mode=ParseMode.MARKDOWN_V2,
+        )
         return RAFFLE_NAME  # Await
     else:
         await update.message.reply_text(
@@ -97,9 +102,13 @@ async def numbers_for_add_response(update: Update, context: CallbackContext) -> 
             await update.message.reply_text(query_response["msg"])
         else:
             raffle = query_response["msg"]
-            marked_numbers = str(raffle["marked_numbers"]).split(
-                " "
-            )  # transform to a list
+
+            if str(raffle["marked_numbers"]) == "":  # if not have numbers in the raffle
+                marked_numbers: list[str] = []
+            else:
+                marked_numbers = (
+                    str(raffle["marked_numbers"]).strip().split(" ")
+                )  # transform to a list
 
             # Add numbers to marked numbers
 
