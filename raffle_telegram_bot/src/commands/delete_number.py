@@ -102,7 +102,10 @@ async def numbers_for_delete_response(update: Update, context: CallbackContext) 
         # remove to marked numbers
 
         for number in numbers_list:
-            marked_numbers.remove(str(number))
+            try:
+                marked_numbers.remove(str(number))
+            except ValueError:
+                continue
 
         # update in database
 
