@@ -14,10 +14,6 @@ def add_numbers_to_raffle(
 ):
     chat_id = str(chat_id)
 
-    data = sanitize_xss(
-        marked_numbers=new_marked_numbers,
-    )
-
     with Session(db_engine) as session:
         saved_raffle = (
             session.query(RaffleModel)
@@ -43,7 +39,7 @@ def add_numbers_to_raffle(
                 }
 
             # add
-            saved_raffle.marked_numbers = data["marked_numbers"]
+            saved_raffle.marked_numbers = new_marked_numbers.strip()
 
         else:
             return {"status": False, "msg": f"Rifa não existe"}
