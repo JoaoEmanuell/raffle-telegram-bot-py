@@ -41,7 +41,7 @@ async def raffle_name_response(update: Update, context: CallbackContext) -> int:
 async def raffle_username_response(update: Update, context: CallbackContext) -> int:
     response = update.message.text
 
-    username = response.strip().replace("@", "")  # remove the @ me
+    username = response.strip().replace("@", "")  # remove the @
     raffle_name = context.user_data["raffle_name"]
     chat_id = context._chat_id
 
