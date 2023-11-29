@@ -4,17 +4,9 @@ from ....db import RaffleModel
 from src.db.connection import db_engine
 
 
-def read_raffle(
-    name: str,
-    user_id: str,
-    chat_id: str,
-) -> [dict, str | bool]:
+def read_raffle(**args_to_query) -> [dict, str | bool]:
     with Session(db_engine) as session:
-        raffle = (
-            session.query(RaffleModel)
-            .filter_by(name=name, user_id=user_id, chat_id=chat_id)
-            .first()
-        )
+        raffle = session.query(RaffleModel).filter_by(**args_to_query).first()
 
         if raffle:
             session.close()
