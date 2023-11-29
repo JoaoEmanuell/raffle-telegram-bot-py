@@ -126,11 +126,11 @@ async def raffle_publishers_response(update: Update, context: CallbackContext) -
         raffle = query_response["msg"]
         marked_numbers = str(raffle["marked_numbers"]).split(" ")
         image_path = generate_raffle_image(raffle["numbers"], marked_numbers)
-        await update.message.reply_photo(image_path)
         await update.message.reply_text(
-            "Caso você deseje usar uma imagem como modelo da rifa, você pode usar o comando */edit* e selecionar para colocar uma nova imagem como modelo base.",
+            "Caso você deseje usar uma imagem como modelo da rifa, você pode usar o comando */edit* e selecionar para colocar uma nova imagem como modelo base\.",
             parse_mode=ParseMode.MARKDOWN_V2,
         )
+        await update.message.reply_photo(image_path)
         remove(image_path)
 
     return ConversationHandler.END
