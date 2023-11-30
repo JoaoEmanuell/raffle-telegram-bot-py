@@ -19,9 +19,7 @@ class RaffleModel(Base):
     __tablename__ = "raffle"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(
-        EncryptedType(Unicode, AES_KEY, AesEngine, "pkcs5")
-    )  # EncryptedType(Unicode, AES_KEY, AesEngine, "pkcs5")  # raffle name
+    name = Column(EncryptedType(Unicode, AES_KEY, AesEngine, "pkcs5"))  # raffle name
     user_id = Column(
         EncryptedType(Unicode, AES_KEY, AesEngine, "pkcs5")
     )  # creator user id
@@ -36,3 +34,9 @@ class RaffleModel(Base):
     marked_numbers = Column(
         EncryptedType(Unicode, AES_KEY, AesEngine, "pkcs5")
     )  # separate with spaces
+    image_base = Column(
+        EncryptedType(Unicode, AES_KEY, AesEngine, "pkcs5")
+    )  # image base with red rectangle to replace with generated image
+    image_base_rectangle_positions = Column(
+        EncryptedType(Unicode, AES_KEY, AesEngine, "pkcs5")
+    )  # positions with rectangle, separate with spaces [x y width height]
