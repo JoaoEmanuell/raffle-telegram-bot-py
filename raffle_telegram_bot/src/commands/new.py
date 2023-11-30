@@ -63,7 +63,7 @@ async def raffle_numbers_response(update: Update, context: CallbackContext) -> i
     response = update.message.text
 
     try:
-        numbers = int(response)
+        numbers = abs(int(response))
     except ValueError:
         await update.message.reply_text(
             f"A quantidade informada é inválida, informe novamente com uma quantidade válida\!",

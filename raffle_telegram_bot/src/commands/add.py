@@ -61,7 +61,7 @@ async def numbers_for_add_response(update: Update, context: CallbackContext) -> 
 
     numbers_list = response.strip().split(" ")
     try:
-        numbers_list = [int(x) for x in numbers_list]
+        numbers_list = [abs(int(x)) for x in numbers_list]
     except ValueError:
         await update.message.reply_text(
             f"Um dos números informados é inválido, por favor, informe números válidos\!",
