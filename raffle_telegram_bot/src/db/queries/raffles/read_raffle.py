@@ -4,7 +4,7 @@ from ....db import RaffleModel
 from src.db.connection import db_engine
 
 
-def read_raffle(**args_to_query) -> [dict, str | bool]:
+def read_raffle(**args_to_query) -> dict[str | bool]:
     with Session(db_engine) as session:
         raffle = session.query(RaffleModel).filter_by(**args_to_query).first()
 

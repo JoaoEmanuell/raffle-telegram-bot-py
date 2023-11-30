@@ -20,7 +20,7 @@ NUMBERS_FOR_ADD = 3
 
 
 async def add_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    """Add marked number in the riffle"""
+    """Add marked number in the raffle"""
     message = "Informe o nome da rifa"
     await update.message.reply_text(message, parse_mode=ParseMode.MARKDOWN_V2)
     return RAFFLE_NAME  # Await

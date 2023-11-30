@@ -8,6 +8,7 @@ from .commands import (
     list_command,
     create_show_command_handle,
     list_me_command,
+    create_edit_command_handle,
 )
 from .utils import cancel, get_raffle_name, generate_raffle_image, get_raffle_username
 from .db import create_tables, RaffleModel

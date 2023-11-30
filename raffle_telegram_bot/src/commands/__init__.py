@@ -7,3 +7,4 @@ from .help import help_command
 from .list import list_command
 from .list_me import list_me_command
 from .show import create_show_command_handle
+from .edit import create_edit_command_handle
