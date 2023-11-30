@@ -14,6 +14,8 @@ def update_raffle(
     new_publishers: str = None,
     new_numbers: int = None,
     new_marked_numbers: str = None,
+    new_image_base: str = None,
+    image_base_rectangle_positions: str = None,
 ):
     user_id = str(user_id)
     chat_id = str(chat_id)
@@ -24,6 +26,8 @@ def update_raffle(
         publishers=new_publishers,
         numbers=new_numbers,
         marked_numbers=new_marked_numbers,
+        new_image_base=new_image_base,
+        image_base_rectangle_positions=image_base_rectangle_positions,
     )
 
     print(data["numbers"])

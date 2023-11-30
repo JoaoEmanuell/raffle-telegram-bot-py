@@ -13,6 +13,8 @@ def create_raffle(
     publishers: str = None,
     numbers: int = None,
     marked_numbers: str = None,
+    image_base: str = None,
+    image_base_rectangle_positions: str = None,
 ) -> [dict, str | bool]:
     with Session(db_engine) as session:
         # validate if raffle exists
@@ -38,6 +40,8 @@ def create_raffle(
                 publishers=publishers,
                 numbers=numbers,
                 marked_numbers=marked_numbers,
+                image_base=image_base,
+                image_base_rectangle_positions=image_base_rectangle_positions,
             )
 
             data["numbers"] = int(numbers)
