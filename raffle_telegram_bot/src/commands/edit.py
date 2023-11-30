@@ -12,7 +12,7 @@ from telegram.constants import ParseMode
 from ..utils import get_raffle_name, get_raffle_username, cancel
 from ..db import read_raffle, update_raffle
 
-from .edit_options import edit_raffle_name
+from .edit_options import edit_raffle_name, edit_raffle_publishers, edit_raffle_numbers
 
 RAFFLE_NAME = 1
 RAFFLE_USERNAME = 2
@@ -84,6 +84,7 @@ async def edit_action_response(update: Update, context: CallbackContext) -> int:
             await update.message.reply_text("Informe uma opção válida!")
             return EDIT_ACTION  # Await
         else:
+            raffle = context.user_data["raffle"]
             actions = {
                 1: {
                     "action": ACTION_EDIT_RAFFLE_NAME,
@@ -93,7 +94,14 @@ async def edit_action_response(update: Update, context: CallbackContext) -> int:
                     "action": ACTION_EDIT_RAFFLE_PUBLISHERS,
                     "messages": [
                         "Informe os nomes dos novos editores da rifa, separados por espaço",
-                        f"Editores atuais: {context.user_data['raffle']['publishers']}",
+                        f"Editores atuais: {raffle['publishers']}",
+                    ],
+                },
+                3: {
+                    "action": ACTION_EDIT_NUMBERS,
+                    "messages": [
+                        "Informe a nova quantidade de números da rifa",
+                        f"Quantidade atual: {raffle['numbers']}",
                     ],
                 },
             }
@@ -133,7 +141,39 @@ async def action_edit_raffle_publishers_response(
 ) -> int:
     raffle = context.user_data["raffle"]
 
-    print(raffle)
+    edit_raffle_response = await edit_raffle_publishers(
+        update=update,
+        context=context,
+        raffle=raffle,
+        update_raffle=update_raffle,
+    )
+
+    if not edit_raffle_response["status"]:  # error
+        await update.message.reply_text("Informe nomes de editores válidos!")
+        return ACTION_EDIT_RAFFLE_PUBLISHERS
+    else:  # success
+        await update.message.reply_text("Alteração realizada com sucesso")
+        return ConversationHandler.END  # end
+
+
+async def action_edit_raffle_numbers_response(
+    update: Update, context: CallbackContext
+) -> int:
+    raffle = context.user_data["raffle"]
+
+    edit_raffle_response = await edit_raffle_numbers(
+        update=update,
+        context=context,
+        raffle=raffle,
+        update_raffle=update_raffle,
+    )
+
+    if not edit_raffle_response["status"]:  # error
+        await update.message.reply_text("Informe uma quantidade válida!")
+        return ACTION_EDIT_NUMBERS
+    else:  # success
+        await update.message.reply_text("Alteração realizada com sucesso")
+        return ConversationHandler.END  # end
 
 
 def create_edit_command_handle() -> ConversationHandler:
@@ -150,6 +190,9 @@ def create_edit_command_handle() -> ConversationHandler:
             ],
             ACTION_EDIT_RAFFLE_PUBLISHERS: [
                 MessageHandler(TEXT & ~COMMAND, action_edit_raffle_publishers_response)
+            ],
+            ACTION_EDIT_NUMBERS: [
+                MessageHandler(TEXT & ~COMMAND, action_edit_raffle_numbers_response)
             ],
         },
         fallbacks=[CommandHandler("cancel", cancel)],

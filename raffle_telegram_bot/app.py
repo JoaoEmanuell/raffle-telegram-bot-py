@@ -10,7 +10,8 @@ from src import (
     create_tables,
     list_command,
     create_show_command_handle,
-    list_me_command
+    list_me_command,
+    create_edit_command_handle,
 )
 
 
@@ -38,6 +39,7 @@ if __name__ == "__main__":
     app.add_handler(CommandHandler("list", list_command))  # list
     app.add_handler(CommandHandler("listMe", list_me_command))  # list user raffles
     app.add_handler(create_show_command_handle())  # show
+    app.add_handler(create_edit_command_handle())  # edit
 
     # Run server
     print("Running server")
