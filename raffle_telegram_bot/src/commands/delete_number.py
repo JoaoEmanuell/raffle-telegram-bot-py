@@ -10,7 +10,7 @@ from telegram.ext import (
 from telegram.ext.filters import TEXT, COMMAND
 from telegram.constants import ParseMode
 
-from ..utils import cancel, generate_raffle_image, get_raffle_name
+from ..utils import cancel, generate_raffle_image, get_raffle_name, get_raffle_username
 from ..db import read_raffle, add_numbers_to_raffle
 
 RAFFLE_NAME = 1
@@ -45,25 +45,14 @@ async def raffle_name_response(update: Update, context: CallbackContext) -> int:
 
 
 async def raffle_username_response(update: Update, context: CallbackContext) -> int:
-    response = update.message.text
+    raffle_infos = await get_raffle_username(update, context, read_raffle)
 
-    username = response.strip().replace("@", "")  # remove the @
-    raffle_name = context.user_data["raffle_name"]
-    chat_id = context._chat_id
-
-    query_response = read_raffle(name=raffle_name, username=username, chat_id=chat_id)
-
-    if not query_response["status"]:
-        await update.message.reply_text(query_response["msg"])
-        await update.message.reply_text(
-            "Informe o nome do usuário a quem a rifa pertence, ou use */cancel* para cancelar a operação",
-            parse_mode=ParseMode.MARKDOWN_V2,
-        )
-        return RAFFLE_USERNAME  # Await
+    if not raffle_infos["status"]:
+        return RAFFLE_USERNAME
     else:
-        context.user_data["username"] = username  # add to context
-        context.user_data["raffle_to_delete"] = query_response[
-            "msg"
+        context.user_data["username"] = raffle_infos["username"]
+        context.user_data["raffle_to_delete"] = raffle_infos[
+            "raffle"
         ]  # add raffle to context
         await update.message.reply_text(
             "Informe os números que você deseja deletar, separado por espaço"

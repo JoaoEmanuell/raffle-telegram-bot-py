@@ -12,7 +12,7 @@ from telegram.ext.filters import TEXT, COMMAND
 from telegram.constants import ParseMode
 
 from ..db import read_raffle
-from ..utils import cancel, generate_raffle_image, get_raffle_name
+from ..utils import cancel, generate_raffle_image, get_raffle_name, get_raffle_username
 
 RAFFLE_NAME = 1
 RAFFLE_USERNAME = 2
@@ -43,18 +43,12 @@ async def raffle_name_response(update: Update, context: CallbackContext) -> int:
 
 
 async def raffle_username_response(update: Update, context: CallbackContext) -> int:
-    response = update.message.text
+    raffle_infos = await get_raffle_username(update, context, read_raffle)
 
-    username = response.strip().replace("@", "")  # remove the @
-    raffle_name = context.user_data["raffle_name"]
-    chat_id = context._chat_id
-
-    query_response = read_raffle(name=raffle_name, username=username, chat_id=chat_id)
-    if not query_response["status"]:
-        await update.message.reply_text(query_response["msg"])
-        return RAFFLE_USERNAME  # Await
+    if not raffle_infos["status"]:
+        return RAFFLE_USERNAME
     else:
-        raffle = query_response["msg"]
+        raffle = raffle_infos["raffle"]  # add raffle to context
         numbers = int(raffle["numbers"])
         marked_numbers = str(raffle["marked_numbers"]).split(" ")  # transform to a list
 
