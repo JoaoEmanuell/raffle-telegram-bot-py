@@ -10,7 +10,7 @@ from telegram.ext import (
 from telegram.ext.filters import TEXT, COMMAND
 from telegram.constants import ParseMode
 
-from ..utils import cancel, generate_raffle_image
+from ..utils import cancel, generate_raffle_image, get_raffle_name
 from ..db import read_raffle, add_numbers_to_raffle
 
 RAFFLE_NAME = 1
@@ -29,31 +29,19 @@ async def delete_number_command(
 
 
 async def raffle_name_response(update: Update, context: CallbackContext) -> int:
-    response = update.message.text
+    raffle_infos = await get_raffle_name(update, context, read_raffle)
 
-    context.user_data["raffle_name"] = response.strip()
-
-    raffle_name = context.user_data["raffle_name"]
-    chat_id = context._chat_id
-
-    query_response = read_raffle(
-        name=raffle_name, chat_id=chat_id
-    )  # validate if raffle exists in chat
-
-    if not query_response["status"]:
-        await update.message.reply_text(query_response["msg"])
-        await update.message.reply_text(
-            "Rifa não existe no chat, informe o nome de uma rifa presente no chat, use o */list* para listar todas as rifas criadas nesse chat\!",
-            parse_mode=ParseMode.MARKDOWN_V2,
-        )
-        return RAFFLE_NAME  # Await
+    if not raffle_infos["status"]:  # error
+        return RAFFLE_NAME
     else:
+        context.user_data["raffle_name"] = raffle_infos["raffle_name"]
+        context.user_data["raffle"] = raffle_infos["raffle"]
+
         await update.message.reply_text(
-            "Informe o nome do usuário a quem a rifa pertence, mencione o usuário\!",
-            parse_mode=ParseMode.MARKDOWN_V2,
+            "Informe o nome do usuário a quem a rifa pertence, mencione o usuário!",
         )
 
-    return RAFFLE_USERNAME  # Await
+        return RAFFLE_USERNAME  # Await
 
 
 async def raffle_username_response(update: Update, context: CallbackContext) -> int:
