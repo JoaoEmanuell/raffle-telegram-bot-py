@@ -9,5 +9,5 @@ from .commands import (
     create_show_command_handle,
     list_me_command,
 )
-from .utils import cancel, get_raffle_name, generate_raffle_image
+from .utils import cancel, get_raffle_name, generate_raffle_image, get_raffle_username
 from .db import create_tables, RaffleModel
