@@ -1,3 +1,4 @@
 from .edit_raffle_name import edit_raffle_name
 from .edit_raffle_publishers import edit_raffle_publishers
 from .edit_raffle_numbers import edit_raffle_numbers
+from .edit_raffle_image_base import edit_raffle_image_base

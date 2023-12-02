@@ -1,3 +1,18 @@
+from pathlib import Path
+from os import mkdir
+from os.path import exists
+
+BASE_DIR = Path(__file__).resolve()
+save_path = BASE_DIR.parent.parent.parent
+save_base_image_path = f"{save_path}/database/base_raffles_image"
+
+# create the dir if not exists
+
+if not exists(save_base_image_path):
+    mkdir(save_base_image_path)
+
+from uuid import uuid4
+
 from telegram import Update
 from telegram.ext import (
     ContextTypes,
@@ -6,21 +21,27 @@ from telegram.ext import (
     CommandHandler,
     MessageHandler,
 )
-from telegram.ext.filters import TEXT, COMMAND
+from telegram.ext.filters import TEXT, COMMAND, PHOTO
 from telegram.constants import ParseMode
 
-from ..utils import get_raffle_name, get_raffle_username, cancel
+from requests import get
+
+from ..utils import cancel
 from ..db import read_raffle, update_raffle
 
-from .edit_options import edit_raffle_name, edit_raffle_publishers, edit_raffle_numbers
+from .edit_options import (
+    edit_raffle_name,
+    edit_raffle_publishers,
+    edit_raffle_numbers,
+    edit_raffle_image_base,
+)
 
 RAFFLE_NAME = 1
-RAFFLE_USERNAME = 2
-EDIT_ACTION = 3
-ACTION_EDIT_RAFFLE_NAME = 4
-ACTION_EDIT_RAFFLE_PUBLISHERS = 5
-ACTION_EDIT_NUMBERS = 6
-ACTION_EDIT_IMAGE_MODEL = 7
+EDIT_ACTION = 2
+ACTION_EDIT_RAFFLE_NAME = 3
+ACTION_EDIT_RAFFLE_PUBLISHERS = 4
+ACTION_EDIT_NUMBERS = 5
+ACTION_EDIT_IMAGE_BASE = 6
 
 
 async def edit_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -31,29 +52,29 @@ async def edit_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
 
 async def raffle_name_response(update: Update, context: CallbackContext) -> int:
-    raffle_infos = await get_raffle_name(update, context, read_raffle)
+    # get the raffle
+    response = update.message.text
+
+    raffle_name = response.strip()
+    chat_id = context._chat_id
+    user_id = context._user_id
+
+    raffle_infos = read_raffle(name=raffle_name, chat_id=chat_id, user_id=user_id)
+    print(raffle_infos)
 
     if not raffle_infos["status"]:  # error
+        await update.message.reply_text(
+            "Rifa não existe ou não pertence a você, certifique\-se que a rifa é sua antes de edita\-lá\!\nUse o comando */listMe* para listar as rifas criadas por você\!",
+            parse_mode=ParseMode.MARKDOWN_V2,
+        )
+        await update.message.reply_text(
+            "Informe o nome de uma rifa válida ou use */cancel* para cancelar a operação\!",
+            parse_mode=ParseMode.MARKDOWN_V2,
+        )
         return RAFFLE_NAME
     else:
-        context.user_data["raffle_name"] = raffle_infos["raffle_name"]
-        context.user_data["raffle"] = raffle_infos["raffle"]
-
-        await update.message.reply_text(
-            "Informe o nome do usuário a quem a rifa pertence, mencione o usuário!",
-        )
-
-        return RAFFLE_USERNAME  # Await
-
-
-async def raffle_username_response(update: Update, context: CallbackContext) -> int:
-    raffle_infos = await get_raffle_username(update, context, read_raffle)
-
-    if not raffle_infos["status"]:
-        return RAFFLE_USERNAME
-    else:
-        context.user_data["username"] = raffle_infos["username"]  # add to context
-        context.user_data["raffle"] = raffle_infos["raffle"]  # add raffle to context
+        context.user_data["raffle_name"] = raffle_infos["msg"]["name"]
+        context.user_data["raffle"] = raffle_infos["msg"]
         actions = [
             "*1* Nome da rifa",
             "*2* Editores da rifa",
@@ -93,8 +114,8 @@ async def edit_action_response(update: Update, context: CallbackContext) -> int:
                 2: {
                     "action": ACTION_EDIT_RAFFLE_PUBLISHERS,
                     "messages": [
-                        "Informe os nomes dos novos editores da rifa, separados por espaço",
                         f"Editores atuais: {raffle['publishers']}",
+                        "Informe os nomes dos novos editores da rifa, separados por espaço",
                     ],
                 },
                 3: {
@@ -103,6 +124,10 @@ async def edit_action_response(update: Update, context: CallbackContext) -> int:
                         "Informe a nova quantidade de números da rifa",
                         f"Quantidade atual: {raffle['numbers']}",
                     ],
+                },
+                4: {
+                    "action": ACTION_EDIT_IMAGE_BASE,
+                    "messages": ["Envie a nova imagem modelo da rifa"],
                 },
             }
 
@@ -176,14 +201,54 @@ async def action_edit_raffle_numbers_response(
         return ConversationHandler.END  # end
 
 
+async def action_edit_image_base_response(
+    update: Update, context: CallbackContext
+) -> int:
+    if update.message.photo:
+        # Get the list of photos size
+        photo_sizes = update.message.photo
+
+        # Get the photo object in the best resolution
+        largest_photo = photo_sizes[-1]
+
+        # Get the id
+        file_id = largest_photo.file_id
+
+        # Use the ID to get the file data
+        file = await context.bot.get_file(file_id)
+        # Get the path to image in the telegram api
+        file_api_path = file.file_path
+        content = get(file_api_path).content  # get the byte contents
+        image_name = f"{save_base_image_path}/{uuid4()}.jpg"
+        with open(image_name, "wb") as image:  # write the image in server
+            image.write(content)  # write
+
+        # get the red rectangle area
+
+        edit_raffle_response = await edit_raffle_image_base(
+            update=update,
+            context=context,
+            raffle=context.user_data["raffle"],
+            image_base=image_name,
+            update_raffle=update_raffle,
+        )
+
+        if not edit_raffle_response["status"]:  # error
+            return ACTION_EDIT_IMAGE_BASE
+        else:
+            await update.message.reply_text("Imagem recebida e salva com sucesso!")
+            return ConversationHandler.END  # end
+    else:
+        update.message.reply_text("Imagem inválida")
+        update.message.reply_text("Envie uma imagem válida")
+        return ACTION_EDIT_IMAGE_BASE
+
+
 def create_edit_command_handle() -> ConversationHandler:
     return ConversationHandler(
         entry_points=[CommandHandler("edit", edit_command)],
         states={
             RAFFLE_NAME: [MessageHandler(TEXT & ~COMMAND, raffle_name_response)],
-            RAFFLE_USERNAME: [
-                MessageHandler(TEXT & ~COMMAND, raffle_username_response)
-            ],
             EDIT_ACTION: [MessageHandler(TEXT & ~COMMAND, edit_action_response)],
             ACTION_EDIT_RAFFLE_NAME: [
                 MessageHandler(TEXT & ~COMMAND, action_edit_raffle_name_response)
@@ -193,6 +258,9 @@ def create_edit_command_handle() -> ConversationHandler:
             ],
             ACTION_EDIT_NUMBERS: [
                 MessageHandler(TEXT & ~COMMAND, action_edit_raffle_numbers_response)
+            ],
+            ACTION_EDIT_IMAGE_BASE: [
+                MessageHandler(PHOTO, action_edit_image_base_response)
             ],
         },
         fallbacks=[CommandHandler("cancel", cancel)],
