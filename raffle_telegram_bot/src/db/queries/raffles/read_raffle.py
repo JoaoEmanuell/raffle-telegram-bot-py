@@ -17,6 +17,8 @@ def read_raffle(**args_to_query) -> dict[str | bool]:
                     "publishers": raffle.publishers,
                     "numbers": raffle.numbers,
                     "marked_numbers": raffle.marked_numbers,
+                    "image_base": raffle.image_base,
+                    "image_base_rectangle_positions": raffle.image_base_rectangle_positions,
                 },
             }
         else:

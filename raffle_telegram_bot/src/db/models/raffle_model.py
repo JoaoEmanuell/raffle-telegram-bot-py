@@ -39,4 +39,4 @@ class RaffleModel(Base):
     )  # image base with red rectangle to replace with generated image
     image_base_rectangle_positions = Column(
         EncryptedType(Unicode, AES_KEY, AesEngine, "pkcs5")
-    )  # positions with rectangle, separate with spaces [x y width height]
+    )  # positions with rectangle, separate with spaces [x y height width]
