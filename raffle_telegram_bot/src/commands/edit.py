@@ -1,5 +1,5 @@
 from pathlib import Path
-from os import mkdir
+from os import mkdir, remove
 from os.path import exists
 
 BASE_DIR = Path(__file__).resolve()
@@ -235,8 +235,15 @@ async def action_edit_image_base_response(
         if not edit_raffle_response["status"]:  # error
             return ACTION_EDIT_IMAGE_BASE
         else:
-            await update.message.reply_text("Imagem recebida e salva com sucesso!")
-            return ConversationHandler.END  # end
+            # delete old image
+            old_image = context.user_data["raffle"]["image_base"]
+            try:
+                remove(f"{save_base_image_path}/{old_image}")
+            except FileNotFoundError:
+                pass
+            finally:
+                await update.message.reply_text("Imagem recebida e salva com sucesso!")
+                return ConversationHandler.END  # end
     else:
         update.message.reply_text("Imagem inválida")
         update.message.reply_text("Envie uma imagem válida")
