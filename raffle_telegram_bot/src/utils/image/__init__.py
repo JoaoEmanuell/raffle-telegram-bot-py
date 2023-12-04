@@ -1,1 +1,2 @@
 from .generate_raffle_image import generate_raffle_image
+from .personalized_model_image import personalized_model_image

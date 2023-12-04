@@ -5,33 +5,32 @@ from os.path import exists
 from os import mkdir
 
 BASE_DIR = Path(__file__).resolve()
-save_path = BASE_DIR.parent.parent.parent.parent
+main_dir = BASE_DIR.parent.parent.parent.parent
+tmp_save_path = main_dir
+base_raffles_image_path = f"{main_dir}/database/base_raffles_image"
 
 
 def personalized_model_image(
-    base_image_path: str,
-    raffle_image_path: str,
-    x1: int,
-    y1: int,
-    x2: int,
-    y2: int,
+    base_image: str,  # filename
+    raffle_image_path: str,  # full path
+    x: int,
+    y: int,
+    height: int,
+    width: int,
 ) -> str:
-    with Image.open(base_image_path) as base_image:
+    with Image.open(f"{base_raffles_image_path}/{base_image}") as new_image:
         with Image.open(raffle_image_path) as raffle_image:
-            rectangle_coordinates = (x1, y1, x2, y2)
-            raffle_image = raffle_image.resize(
-                (
-                    rectangle_coordinates[2] - rectangle_coordinates[0],
-                    rectangle_coordinates[3] - rectangle_coordinates[1],
-                )
+            rectangle_coordinates = (int(x), int(y), int(height), int(width))
+            raffle_image = raffle_image.resize((int(width), int(height)))
+            new_image.paste(
+                raffle_image, (rectangle_coordinates[0], rectangle_coordinates[1])
             )
-            base_image.paste(raffle_image, rectangle_coordinates)
 
-    if not exists(f"{save_path}/tmp/"):
-        mkdir(f"{save_path}/tmp/")
+    if not exists(f"{tmp_save_path}/tmp/"):
+        mkdir(f"{tmp_save_path}/tmp/")
 
-        image_name = f"{save_path}/tmp/{str(uuid4())}.png"
+    image_name = f"{tmp_save_path}/tmp/{str(uuid4())}.png"
 
-        base_image.save(image_name)
+    new_image.save(image_name)
 
-        return image_name
+    return image_name
