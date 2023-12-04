@@ -1,13 +1,7 @@
 from PIL import Image
-from pathlib import Path
 from uuid import uuid4
-from os.path import exists
-from os import mkdir
 
-BASE_DIR = Path(__file__).resolve()
-main_dir = BASE_DIR.parent.parent.parent.parent
-tmp_save_path = main_dir
-base_raffles_image_path = f"{main_dir}/database/base_raffles_image"
+from ..paths import tmp_path, save_base_image_path
 
 
 def personalized_model_image(
@@ -18,7 +12,7 @@ def personalized_model_image(
     height: int,
     width: int,
 ) -> str:
-    with Image.open(f"{base_raffles_image_path}/{base_image}") as new_image:
+    with Image.open(f"{save_base_image_path}/{base_image}") as new_image:
         with Image.open(raffle_image_path) as raffle_image:
             rectangle_coordinates = (int(x), int(y), int(height), int(width))
             raffle_image = raffle_image.resize((int(width), int(height)))
@@ -26,10 +20,7 @@ def personalized_model_image(
                 raffle_image, (rectangle_coordinates[0], rectangle_coordinates[1])
             )
 
-    if not exists(f"{tmp_save_path}/tmp/"):
-        mkdir(f"{tmp_save_path}/tmp/")
-
-    image_name = f"{tmp_save_path}/tmp/{str(uuid4())}.png"
+    image_name = f"{tmp_path}{str(uuid4())}.png"
 
     new_image.save(image_name)
 

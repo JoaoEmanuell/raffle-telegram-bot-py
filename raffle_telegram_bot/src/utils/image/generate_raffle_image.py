@@ -1,11 +1,6 @@
 from PIL import Image, ImageDraw, ImageFont
-from pathlib import Path
 from uuid import uuid4
-from os.path import exists
-from os import mkdir
-
-BASE_DIR = Path(__file__).resolve()
-save_path = BASE_DIR.parent.parent.parent.parent
+from ..paths import base_path, tmp_path
 
 
 def generate_raffle_image(quantity: int = 100, marked_numbers: list[int] = []) -> str:
@@ -25,7 +20,7 @@ def generate_raffle_image(quantity: int = 100, marked_numbers: list[int] = []) -
 
     # Fonte and size
     font_size = 25
-    font_dir = f"{BASE_DIR.cwd()}/assets/fonts"
+    font_dir = f"{base_path}/assets/fonts"
     font = ImageFont.truetype(f"{font_dir}/Arial.ttf", font_size)
 
     number = 1
@@ -44,10 +39,7 @@ def generate_raffle_image(quantity: int = 100, marked_numbers: list[int] = []) -
             )
             number += 1
 
-    if not exists(f"{save_path}/tmp/"):
-        mkdir(f"{save_path}/tmp/")
-
-    image_name = f"{save_path}/tmp/{str(uuid4())}.png"
+    image_name = f"{tmp_path}/{str(uuid4())}.png"
 
     image.save(image_name)
 

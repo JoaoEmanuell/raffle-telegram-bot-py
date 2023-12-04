@@ -16,5 +16,9 @@ from .utils import (
     generate_raffle_image,
     get_raffle_username,
     personalized_model_image,
+    base_path,
+    database_path,
+    save_base_image_path,
+    tmp_path,
 )
 from .db import create_tables, RaffleModel

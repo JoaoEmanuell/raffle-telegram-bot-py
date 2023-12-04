@@ -1,16 +1,4 @@
-from pathlib import Path
-from os import mkdir, remove
-from os.path import exists
-
-BASE_DIR = Path(__file__).resolve()
-save_path = BASE_DIR.parent.parent.parent
-save_base_image_path = f"{save_path}/database/base_raffles_image"
-
-# create the dir if not exists
-
-if not exists(save_base_image_path):
-    mkdir(save_base_image_path)
-
+from os import remove
 from uuid import uuid4
 
 from telegram import Update
@@ -26,7 +14,7 @@ from telegram.constants import ParseMode
 
 from requests import get
 
-from ..utils import cancel
+from ..utils import cancel, save_base_image_path
 from ..db import read_raffle, update_raffle
 
 from .edit_options import (

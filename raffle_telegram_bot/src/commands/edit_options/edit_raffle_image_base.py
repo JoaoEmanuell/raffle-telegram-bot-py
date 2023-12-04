@@ -14,7 +14,6 @@ from requests import post
 load_dotenv()
 
 EXTRACTOR_RED_RECTANGLE_API = getenv("EXTRACTOR_RED_RECTANGLE_API")
-print(EXTRACTOR_RED_RECTANGLE_API)
 
 
 async def edit_raffle_image_base(
