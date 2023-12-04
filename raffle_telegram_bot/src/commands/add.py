@@ -12,7 +12,7 @@ from telegram.ext.filters import TEXT, COMMAND
 from telegram.constants import ParseMode
 
 from ..db import add_numbers_to_raffle, read_raffle
-from ..utils import cancel, generate_raffle_image, get_raffle_username, get_raffle_name
+from ..utils import cancel, get_raffle_username, get_raffle_name, handler_generate_image
 
 RAFFLE_NAME = 1
 RAFFLE_USERNAME = 2
@@ -117,8 +117,11 @@ async def numbers_for_add_response(update: Update, context: CallbackContext) -> 
             await update.message.reply_text(query_response["msg"])
         else:
             # generate new image
-            numbers = int(raffle["numbers"])
-            image_path = generate_raffle_image(numbers, marked_numbers)
+            raffle = context.user_data["raffle"]  # get raffle
+            raffle["marked_numbers"] = " ".join(
+                marked_numbers
+            )  # use the new numbers to generate
+            image_path = await handler_generate_image(raffle)
             await update.message.reply_photo(image_path)
             remove(image_path)
 

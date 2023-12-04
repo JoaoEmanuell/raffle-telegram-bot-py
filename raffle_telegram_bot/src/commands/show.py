@@ -14,7 +14,6 @@ from telegram.constants import ParseMode
 from ..db import read_raffle
 from ..utils import (
     cancel,
-    generate_raffle_image,
     get_raffle_name,
     get_raffle_username,
     handler_generate_image,
