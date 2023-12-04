@@ -12,7 +12,13 @@ from telegram.ext.filters import TEXT, COMMAND
 from telegram.constants import ParseMode
 
 from ..db import read_raffle
-from ..utils import cancel, generate_raffle_image, get_raffle_name, get_raffle_username
+from ..utils import (
+    cancel,
+    generate_raffle_image,
+    get_raffle_name,
+    get_raffle_username,
+    personalized_model_image,
+)
 
 RAFFLE_NAME = 1
 RAFFLE_USERNAME = 2
@@ -51,10 +57,30 @@ async def raffle_username_response(update: Update, context: CallbackContext) -> 
         raffle = raffle_infos["raffle"]  # add raffle to context
         numbers = int(raffle["numbers"])
         marked_numbers = str(raffle["marked_numbers"]).split(" ")  # transform to a list
-
-        # generate new image
+        print(raffle)
+        image_base = raffle["image_base"]
         image_path = generate_raffle_image(numbers, marked_numbers)
-        await update.message.reply_photo(image_path)
+        if image_base != "":
+            image_base_rectangle_positions = raffle[
+                "image_base_rectangle_positions"
+            ].split(
+                " "
+            )  # transform to a list
+            image_base_rectangle_positions_dict = {
+                "x": image_base_rectangle_positions[0],
+                "y": image_base_rectangle_positions[1],
+                "height": image_base_rectangle_positions[2],
+                "width": image_base_rectangle_positions[3],
+            }
+            personalized_image = personalized_model_image(
+                image_base, image_path, **image_base_rectangle_positions_dict
+            )
+            # reply the photo
+            await update.message.reply_photo(personalized_image)
+            remove(personalized_image)
+        else:
+            # reply the photo
+            await update.message.reply_photo(image_path)
         remove(image_path)
         return ConversationHandler.END  # end
 

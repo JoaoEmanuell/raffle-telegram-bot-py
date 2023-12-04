@@ -60,7 +60,6 @@ async def raffle_name_response(update: Update, context: CallbackContext) -> int:
     user_id = context._user_id
 
     raffle_infos = read_raffle(name=raffle_name, chat_id=chat_id, user_id=user_id)
-    print(raffle_infos)
 
     if not raffle_infos["status"]:  # error
         await update.message.reply_text(

@@ -10,5 +10,11 @@ from .commands import (
     list_me_command,
     create_edit_command_handle,
 )
-from .utils import cancel, get_raffle_name, generate_raffle_image, get_raffle_username
+from .utils import (
+    cancel,
+    get_raffle_name,
+    generate_raffle_image,
+    get_raffle_username,
+    personalized_model_image,
+)
 from .db import create_tables, RaffleModel
