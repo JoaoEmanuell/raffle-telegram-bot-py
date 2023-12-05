@@ -12,7 +12,6 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         "*/listMe* Lista as rifas criadas pelo usuário",
         "*/edit* Edita as informações da rifa",
         "*/show* Exibe a imagem da rifa",
-        "*/info* Exibe as informações da rifa",
         "*/raffle* Inicia o sorteio da rifa",
         "*/deleteNumber* Delete um número marcado da rifa",
         "*/delete* Deleta a rifa",
