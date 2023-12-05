@@ -64,7 +64,7 @@ async def numbers_for_raffle_response(update: Update, context: CallbackContext) 
     response = update.message.text
 
     try:
-        number_for_raffle = int(response)
+        number_for_raffle = abs(int(response))
     except ValueError:
         await update.message.reply_text(
             f"O valor informado é inválido, informe um valor válido\!",
