@@ -92,7 +92,8 @@ async def raffle_numbers_response(update: Update, context: CallbackContext) -> i
         )
 
         await update.message.reply_text(
-            f"Agora informe os usuários que podem editar a rifa, basta apenas mencioná-los!"
+            f"Agora informe os usuários que podem editar a rifa, separado por espaço, basta apenas mencioná\-los\!\nVocê também pode digitar *skip* para pular essa etapa\!",
+            parse_mode=ParseMode.MARKDOWN_V2,
         )
 
         # End
@@ -102,26 +103,41 @@ async def raffle_numbers_response(update: Update, context: CallbackContext) -> i
 async def raffle_publishers_response(update: Update, context: CallbackContext) -> int:
     response = update.message.text
 
-    publishers = response.strip().replace("@", "")
+    if response.strip().lower() == "skip":  # skip this step
+        await finish_create_raffle(update, context)
+        return ConversationHandler.END
+    else:
+        publishers = response.strip().replace("@", "")
+        raffle_name = context.user_data["raffle_name"]
+        user_id = context._user_id
+        chat_id = context._chat_id
+
+        query_response = update_raffle(
+            name=raffle_name,
+            user_id=user_id,
+            chat_id=chat_id,
+            new_publishers=publishers,
+        )
+
+        if not query_response["status"]:
+            await update.message.reply_text(query_response["msg"])
+            await update.message.reply_text("Informe usuários válidos!")
+            return RAFFLE_PUBLISHERS
+        else:
+            await finish_create_raffle(update, context)
+            return ConversationHandler.END
+
+
+async def finish_create_raffle(update: Update, context: CallbackContext) -> None:
     raffle_name = context.user_data["raffle_name"]
     user_id = context._user_id
     chat_id = context._chat_id
-
-    query_response = update_raffle(
-        name=raffle_name, user_id=user_id, chat_id=chat_id, new_publishers=publishers
-    )
-
-    if not query_response["status"]:
-        await update.message.reply_text(query_response["msg"])
-        await update.message.reply_text("Informe usuários válidos!")
-        return RAFFLE_PUBLISHERS
 
     await update.message.reply_text("Rifa criada com sucesso!")
 
     query_response = read_raffle(name=raffle_name, user_id=user_id, chat_id=chat_id)
     if not query_response["status"]:
         await update.message.reply_text(query_response["msg"])
-        return ConversationHandler.END
     else:
         raffle = query_response["msg"]
         marked_numbers = str(raffle["marked_numbers"]).split(" ")
@@ -132,8 +148,6 @@ async def raffle_publishers_response(update: Update, context: CallbackContext) -
         )
         await update.message.reply_photo(image_path)
         remove(image_path)
-
-    return ConversationHandler.END
 
 
 def create_new_command_handle() -> ConversationHandler:
