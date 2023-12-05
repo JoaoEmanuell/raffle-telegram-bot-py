@@ -114,7 +114,10 @@ async def edit_action_response(update: Update, context: CallbackContext) -> int:
                 },
                 4: {
                     "action": ACTION_EDIT_IMAGE_BASE,
-                    "messages": ["Envie a nova imagem modelo da rifa"],
+                    "messages": [
+                        "A imagem modelo da rifa deve possuir um retângulo vermelho (de preferência o mais vermelho possível) que será analisado e posteriormente será substituído pela imagem gerada da rifa!",
+                        "Envie a nova imagem modelo da rifa",
+                    ],
                 },
             }
 
