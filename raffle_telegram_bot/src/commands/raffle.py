@@ -101,7 +101,7 @@ async def numbers_for_raffle_response(update: Update, context: CallbackContext) 
 
         sorted_numbers.sort()  # sort the list
 
-        sorted_numbers = " ".join(sorted_numbers)
+        sorted_numbers = " ".join(map(str, sorted_numbers))  # convert numbers to string
 
         await update.message.reply_text(
             f"Números vencedores: {sorted_numbers}",
