@@ -51,6 +51,9 @@ async def raffle_username_response(update: Update, context: CallbackContext) -> 
         context.user_data["username"] = raffle_infos["username"]  # add to context
         context.user_data["raffle"] = raffle_infos["raffle"]  # add raffle to context
         await update.message.reply_text(
+            f"Números marcados: {raffle_infos['raffle']['marked_numbers']}"
+        )
+        await update.message.reply_text(
             "Informe os números que você deseja marcar, separado por espaço"
         )
         return NUMBERS_FOR_ADD  # Await
@@ -90,6 +93,11 @@ async def numbers_for_add_response(update: Update, context: CallbackContext) -> 
                     f"O número {number} já foi adicionado, informe novos números!"
                 )
                 return NUMBERS_FOR_ADD  # Await
+            elif number > int(raffle["numbers"]):
+                await update.message.reply_text(
+                    f"O número {number} é superior a quantidade de números da rifa, informe novos números!"
+                )
+                return NUMBERS_FOR_ADD  # Await
             else:
                 marked_numbers.append(str(number))
 
@@ -116,6 +124,9 @@ async def numbers_for_add_response(update: Update, context: CallbackContext) -> 
         if not query_response["status"]:
             await update.message.reply_text(query_response["msg"])
         else:
+            await update.message.reply_text(
+                "Números adicionados com sucesso, gerando uma nova imagem da rifa!"
+            )
             # generate new image
             raffle = context.user_data["raffle"]  # get raffle
             raffle["marked_numbers"] = " ".join(
