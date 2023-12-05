@@ -39,8 +39,17 @@ def generate_raffle_image(quantity: int = 100, marked_numbers: list[int] = []) -
             )
             number += 1
 
+    # add a border in the image
+    border_size = 5
+    bordered_image = Image.new(
+        "RGB",
+        (image_size[0] + 2 * border_size, image_size[1] + 2 * border_size),
+        "black",
+    )
+    bordered_image.paste(image, (border_size, border_size))
+
     image_name = f"{tmp_path}/{str(uuid4())}.png"
 
-    image.save(image_name)
+    bordered_image.save(image_name)
 
     return image_name
