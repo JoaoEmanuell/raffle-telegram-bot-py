@@ -12,6 +12,7 @@ from .commands import (
 )
 from .utils import (
     cancel,
+    error,
     get_raffle_name,
     generate_raffle_image,
     get_raffle_username,

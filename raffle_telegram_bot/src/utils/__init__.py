@@ -7,3 +7,4 @@ from .image import (
 )
 from .commands_functions import get_raffle_name, get_raffle_username
 from .paths import base_path, database_path, save_base_image_path, tmp_path
+from .error import error
