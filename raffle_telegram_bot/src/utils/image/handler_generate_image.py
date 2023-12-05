@@ -17,7 +17,7 @@ async def handler_generate_image(raffle: dict) -> str:
     marked_numbers = str(raffle["marked_numbers"]).split(" ")  # transform to a list
     image_base = raffle["image_base"]
     image_path = generate_raffle_image(numbers, marked_numbers)
-    if image_base != "":
+    if image_base != "None":  # if exists a base image
         image_base_rectangle_positions = raffle["image_base_rectangle_positions"].split(
             " "
         )  # transform to a list
