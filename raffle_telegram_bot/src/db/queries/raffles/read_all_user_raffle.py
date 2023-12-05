@@ -23,9 +23,7 @@ def read_all_user_raffle(
                 for raffle in raffles:
                     publishers_list = str(raffle.publishers).split(" ")
                     publishers = [f"@{x} " for x in publishers_list]
-                    marked_numbers_list = str(raffle.marked_numbers).split(" ")
-                    marked_numbers = [f"{x} " for x in marked_numbers_list]
-                    raffle_msg = f"\n\*\*\*\*\n*Rifa:* {raffle.name}\n*Editores:* {publishers}\n*Quantidade:* {raffle.numbers}\n*Números marcados:* {marked_numbers}\n"
+                    raffle_msg = f"\n\*\*\*\*\n*Rifa:* {raffle.name}\n*Editores:* {publishers}\n*Quantidade:* {raffle.numbers}\n*Números marcados:* {raffle.marked_numbers}\n"
                     msg = msg + raffle_msg
 
         else:
