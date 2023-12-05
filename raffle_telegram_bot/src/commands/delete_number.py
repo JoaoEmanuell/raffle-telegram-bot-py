@@ -123,7 +123,7 @@ async def numbers_for_delete_response(update: Update, context: CallbackContext) 
 
 def create_delete_number_command_handle() -> ConversationHandler:
     return ConversationHandler(
-        entry_points=[CommandHandler("deleteNumber", delete_number_command)],
+        entry_points=[CommandHandler("deletenumber", delete_number_command)],
         states={
             RAFFLE_NAME: [MessageHandler(TEXT & ~COMMAND, raffle_name_response)],
             RAFFLE_USERNAME: [

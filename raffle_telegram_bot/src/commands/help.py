@@ -9,11 +9,11 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
         "*/new* Cria uma nova rifa",
         "*/add* Adicione números marcados a rifa",
         "*/list* Lista as rifas criadas no chat",
-        "*/listMe* Lista as rifas criadas pelo usuário",
+        "*/listme* Lista as rifas criadas pelo usuário",
         "*/edit* Edita as informações da rifa",
         "*/show* Exibe a imagem da rifa",
         "*/raffle* Inicia o sorteio da rifa",
-        "*/deleteNumber* Delete um número marcado da rifa",
+        "*/deletenumber* Delete um número marcado da rifa",
         "*/delete* Deleta a rifa",
         "*/cancel* Cancela a operação que está sendo realizada no momento",
     ]
