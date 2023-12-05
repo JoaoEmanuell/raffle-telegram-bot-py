@@ -10,7 +10,7 @@ from telegram.ext import (
 from telegram.ext.filters import TEXT, COMMAND
 from telegram.constants import ParseMode
 
-from ..utils import cancel, generate_raffle_image, get_raffle_name, get_raffle_username
+from ..utils import cancel, get_raffle_name, get_raffle_username, handler_generate_image
 from ..db import read_raffle, add_numbers_to_raffle
 
 RAFFLE_NAME = 1
@@ -54,6 +54,9 @@ async def raffle_username_response(update: Update, context: CallbackContext) -> 
         context.user_data["raffle_to_delete"] = raffle_infos[
             "raffle"
         ]  # add raffle to context
+        await update.message.reply_text(
+            f"Números marcados: {raffle_infos['raffle']['marked_numbers']}"
+        )
         await update.message.reply_text(
             "Informe os números que você deseja deletar, separado por espaço"
         )
@@ -106,8 +109,12 @@ async def numbers_for_delete_response(update: Update, context: CallbackContext) 
             await update.message.reply_text(
                 "Números apagados com sucesso\nGerando uma nova imagem"
             )
-            numbers = int(raffle_to_delete["numbers"])
-            image_path = generate_raffle_image(numbers, marked_numbers)
+            # generate new image
+            raffle = context.user_data["raffle_to_delete"]  # get raffle
+            raffle["marked_numbers"] = " ".join(
+                marked_numbers
+            )  # use the new numbers to generate
+            image_path = await handler_generate_image(raffle)
             await update.message.reply_photo(image_path)
             remove(image_path)
 
